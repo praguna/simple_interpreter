@@ -1,4 +1,4 @@
-from ast import Program,Var,Block,VarDecl,Type,NoOp,BnOp,Num,UnOp,Assign,Compound
+from ast import Program,Var,Block,VarDecl,Type,NoOp,BnOp,Num,UnOp,Assign,Compound,ProcedureDecl,Params
 from token import *
 
 #   PARSER
@@ -43,7 +43,8 @@ class Parser():
         return Block(declaration_nodes,compound_statement)
     
     def declarations(self):
-        # DECLARATIONS :  VAR(VARDECL SEMI)* | EMPTY 
+        # DECLARATIONS :  VAR(VARDECL SEMI)+ (PROCEDURE ID (LPAREN FORMAL_PARAMETER_LIST RPAREN)? SEMI BLOCK SEMI)* 
+        # | EMPTY 
         declarations = []
         if self.current_token.type == VAR:
             self.eat(VAR)
@@ -51,7 +52,44 @@ class Parser():
                 var_decl = self.var_decl()
                 declarations.extend(var_decl)
                 self.eat(SEMI)
+    
+        while self.current_token.type == PROCEDURE:
+            self.eat(PROCEDURE)
+            name_node = self.variable()
+            params = []
+            if self.current_token.type == LPAREN:
+                self.eat(LPAREN)
+                params = self.formal_parameter_list()
+                self.eat(RPAREN)
+            self.eat(SEMI)
+            block = self.block()
+            self.eat(SEMI)
+            declarations.append(ProcedureDecl(name_node.value, block,params))
+            
         return declarations
+    
+    def formal_parameter_list(self):
+        # FORMAL_PARAMETER_LIST : FORMAL_PARAMETERS | FORMAL_PARAMETERS SEMI FORMAL_PARAMETER_LIST
+        parameter_list = [self.formal_parameters()]
+        while self.current_token.type == SEMI:
+            self.eat(SEMI)
+            parameter_list.extend(self.formal_parameters())
+        return parameter_list
+
+    def formal_parameters(self):
+        # FORMAL_PARAMETERS : ID (COMMA ID)* COLON TYPE_SPEC
+        params = []
+        vars = [self.current_token]
+        self.eat(ID)
+        while self.current_token.type == COMMA:
+            self.eat(COMMA)
+            vars.append(self.current_token)
+            self.eat(ID)
+        self.eat(COLON)
+        type = self.type_spec()
+        for var in vars:
+            params.append(Params(Var(var),type))
+        return params    
     
     def var_decl(self):
         # VARDECL : VAR(COMMA VAR)* : TYPESPEC
@@ -68,13 +106,15 @@ class Parser():
         ]
 
     def type_spec(self):
-        # TYPESPEC : INTEGER : REAL
+        # TYPESPEC : INTEGER | REAL
         if self.current_token.type == INTEGER:
             node = Type(self.current_token)
             self.eat(INTEGER)
-        if self.current_token.type == REAL:
+        elif self.current_token.type == REAL:
             node = Type(self.current_token)
             self.eat(REAL)
+        else:
+            raise Exception('Error : unknown type {}'.format(self.current_token.value))
         return node
 
     def compound_statement(self):
@@ -156,4 +196,5 @@ class Parser():
             return UnOp(token,self.expr())
     
     def error(self):
+        print(self.current_token)
         raise Exception("Invalid Syntax !")

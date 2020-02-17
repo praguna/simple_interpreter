@@ -55,3 +55,14 @@ class Type(AST):
     def __init__(self,token):
         self.token = token
         self.value = token.value
+
+class ProcedureDecl(AST):
+    def __init__(self,name,block,params):
+        self.block = block
+        self.params = params
+        self.name = name
+
+class Params(AST):
+    def __init__(self,var_node,type_node):
+        self.var_node = var_node
+        self.type_node = type_node

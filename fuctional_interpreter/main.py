@@ -1,7 +1,7 @@
 from lexer import Lexer
 from interpreter import Interpreter
 from pascal_parser import Parser
-from symbol_table import SymbolTableBuilder
+from static_semantics import SemanticAnalyzer
 
 #   MAIN 
 if __name__ == '__main__':
@@ -12,11 +12,11 @@ if __name__ == '__main__':
     #     print(lexer.next_token()) 
     parser = Parser(lexer)
     tree = parser.parse()
-    symbuilder = SymbolTableBuilder()
+    symbuilder = SemanticAnalyzer()
     symbuilder.visit(tree)
     print("ALL CLEAR !")
-    print(symbuilder.symtab)
-    interpreter  = Interpreter(tree)
-    interpreter.interpret()
-    print("Global Memory State !")
-    print(interpreter.GLOBAL_SCOPE)    
+    print(symbuilder.current_scope)
+    # interpreter  = Interpreter(tree)
+    # interpreter.interpret()
+    # print("Global Memory State !")
+    # print(interpreter.GLOBAL_SCOPE)    

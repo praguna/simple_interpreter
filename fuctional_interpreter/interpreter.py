@@ -60,3 +60,8 @@ class Interpreter(NodeVisitor):
     def visit_Compound(self, node):
         for child in node.children:
             self.visit(child)
+    
+    def visit_ProcedureDecl(self,node):
+        pass
+    def visit_Params(self,node):
+        pass
