@@ -1,17 +1,15 @@
 from token import *
 from visitor import NodeVisitor
-
+# EACH FUNCTION STARTING WITH visit_ handles corresponding AST NODE
 class Interpreter(NodeVisitor):
 
     GLOBAL_SCOPE = {}
 
-    def __init__(self,parser):
-        self.parser =parser
+    def __init__(self,tree):
+        self.tree =tree
     
     def interpret(self):
-        tree = self.parser.parse()
-        self.visit(tree)
-        print(self.GLOBAL_SCOPE)
+        self.visit(self.tree)
     
     def visit_Program(self,program):
         self.visit(program.block)

@@ -1,4 +1,4 @@
-#AST 
+#AST and other nodes defines different types of nodes expected by the interpreter
 class AST():
     pass
 

@@ -2,7 +2,7 @@ PROGRAM Part10;
 VAR
    number     : INTEGER;
    a, b, c, x : INTEGER;
-   y          : REAL;
+   y,z          : REAL;
 
 BEGIN {Part10}
    BEGIN
@@ -11,6 +11,8 @@ BEGIN {Part10}
       b := 10 * a + 10 * number DIV 4; 
       c := a - - b;
       x := c * b * a;
+      z := c + 2;
+      {d := 1+2}
    END;
    x := 11;
    y := 20 / 7 + 3.14;

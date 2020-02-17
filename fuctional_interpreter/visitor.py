@@ -1,3 +1,4 @@
+# DEFINED TO PROVIDE INTERFACE FOR VISITOR NODES
 
 class NodeVisitor():
     def visit(self,node):

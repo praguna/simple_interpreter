@@ -8,18 +8,21 @@ class Parser():
         self.current_token = self.lexer.next_token()
     
     def parse(self):
+        # CALLER FUCTION FOR PARSING
         tree  = self.program()
         if self.current_token.type != EOF:
             self.error()
         return tree
     
     def eat(self,token_type):
+        # MOVES TO THE NEXT TOKEN AFTER VALIDATION
         if self.current_token.type == token_type:
             self.current_token = self.lexer.next_token()
         else: 
             self.error()
 
     def program(self):
+        # PROGRAM : BLOCK DOT
         self.eat(PROGRAM)
         name_node  = self.variable()
         self.eat(SEMI)
@@ -28,16 +31,19 @@ class Parser():
         return Program(name_node.value,block)
     
     def variable(self):
+        # VAR : ID
         token = self.current_token
         self.eat(ID)
         return Var(token)
     
     def block(self):
+        # BLOCK : DECLARATIONS COMPOUND_STATEMENT
         declaration_nodes = self.declarations()
         compound_statement = self.compound_statement()
         return Block(declaration_nodes,compound_statement)
     
     def declarations(self):
+        # DECLARATIONS :  VAR(VARDECL SEMI)* | EMPTY 
         declarations = []
         if self.current_token.type == VAR:
             self.eat(VAR)
@@ -48,6 +54,7 @@ class Parser():
         return declarations
     
     def var_decl(self):
+        # VARDECL : VAR(COMMA VAR)* : TYPESPEC
         nodes = [Var(self.current_token)]
         self.eat(ID)
         while self.current_token.type is not COLON:
@@ -61,6 +68,7 @@ class Parser():
         ]
 
     def type_spec(self):
+        # TYPESPEC : INTEGER : REAL
         if self.current_token.type == INTEGER:
             node = Type(self.current_token)
             self.eat(INTEGER)
@@ -70,6 +78,7 @@ class Parser():
         return node
 
     def compound_statement(self):
+        #COMPOUND_STATEMENT : BEGIN STATEMENT_LIST END
         node = Compound()
         self.eat(BEGIN)
         node.children = self.statement_list()
@@ -77,6 +86,7 @@ class Parser():
         return node
     
     def statement_list(self):
+        #STATEMENT_LIST : STATEMENT | STATEMENT SEMI STATEMENT_LIST
         result = [self.statement()]
         while self.current_token.type == SEMI:
             self.eat(SEMI)
@@ -84,6 +94,7 @@ class Parser():
         return result
     
     def statement(self):
+        # STATEMENT : EMPTY | ASSIGNMENT | COMPOUND_STATEMENT
         if self.current_token.type == BEGIN:
             return self.compound_statement()
         elif self.current_token.type == ID:
@@ -92,6 +103,7 @@ class Parser():
             return NoOp()
     
     def assignment(self):
+        #ASSIGNMENT : VAR ASSGN EXPR
         var_node = self.variable()
         token = self.current_token
         self.eat(ASSGN)
@@ -99,6 +111,7 @@ class Parser():
         return Assign(var_node,token,expr)
     
     def expr(self):
+        # EXPR : TERM ((PLUS | MINUS)TERM)*
         node = self.term()
         while self.current_token.type in (PLUS,MINUS):
             token = self.current_token
@@ -110,6 +123,7 @@ class Parser():
         return node 
     
     def term(self):
+        # FACTOR  : FACTOR ((MUL | DIV_INT | DIV_FLOAT) FACTOR)*
         node = self.factor()
         while self.current_token.type in (MUL, DIV_INT,DIV_FLOAT):
             token = self.current_token
@@ -123,6 +137,7 @@ class Parser():
         return node
     
     def factor(self):
+        # FACTOR : ID | VAR | PLUS EXPR | MINUS EXPR | LPAREN EXPR RPAREN 
         token = self.current_token
         if token.type == ID:
             self.eat(ID)

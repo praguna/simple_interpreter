@@ -1,5 +1,5 @@
 from token import *
-# LEXER CLASS
+# LEXER CLASS SCANS THE TEXT AND RETURNS TOKENS WHEN ONE IS ENCOUNTERED
 class Lexer():
     def __init__(self,text):
         self.text = text
@@ -90,7 +90,7 @@ class Lexer():
         while self.current_char is not None and self.current_char.isalnum():
             result+=self.current_char
             self.advance()
-        token = RESERVED_KEYWORDS.get(result,Token(ID,result))
+        token = RESERVED_KEYWORDS.get(result.upper(),Token(ID,result.upper()))
         return token
     
     def get_number(self):

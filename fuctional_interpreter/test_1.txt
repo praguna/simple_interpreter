@@ -1,0 +1,7 @@
+PROGRAM Part11;
+VAR
+   x, Y : INTEGER;
+BEGIN
+   x := 2;
+   y := 3 + x;
+END.
