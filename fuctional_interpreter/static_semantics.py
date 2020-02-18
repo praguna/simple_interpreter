@@ -2,10 +2,11 @@ from visitor import NodeVisitor
 from symbol_type import *
 
 class ScopedSymbolTable():
-    def __init__(self,scope_level,scope_name):
+    def __init__(self,scope_level,scope_name,enclosing_scope = None):
         self._symbol = {}
         self.scope_level = scope_level
         self.scope_name = scope_name
+        self.enclosing_scope = enclosing_scope
         self.__init__builtin()
         
     def __init__builtin(self):
@@ -16,10 +17,16 @@ class ScopedSymbolTable():
         print("Define %s"%symbol)
         self._symbol[symbol.name] = symbol
     
-    def lookup(self,name):
-        print("Lookup %s"%name)
-        type = self._symbol.get(name)
-        return type
+    def lookup(self,name,current_scope_only = False):
+        print("Lookup {name} (Scope {scope_name})".format(name = name,scope_name = self.scope_name))
+        symbol = self._symbol.get(name)
+        if symbol is not None:
+            return symbol
+        if current_scope_only:
+            return None
+        if self.enclosing_scope is not None:
+            return self.enclosing_scope.lookup(name)
+        return symbol
 
     def __str__(self):
         s = 'Scoped Symbol Table \n' + "--"*10+'\n\
@@ -36,11 +43,13 @@ class SemanticAnalyzer(NodeVisitor):
         self.current_scope = None
 
     def visit_Program(self,node):
-        print("Entering Global Scope")
-        global_scope = ScopedSymbolTable(scope_level=1,scope_name="global")
+        print("Entering Global Scope :")
+        global_scope = ScopedSymbolTable(scope_level=1,scope_name="global",enclosing_scope=None)
         self.current_scope = global_scope
         self.visit(node.block)
-        print("Leaving Global Scope")
+        print(global_scope)
+        self.current_scope = self.current_scope.enclosing_scope
+        print("Leaving Global Scope :")
 
     def visit_Block(self,node):
         for decl in node.declarations:
@@ -57,8 +66,8 @@ class SemanticAnalyzer(NodeVisitor):
     def visit_VarDecl(self,node):
         type_name = node.type_node.value
         name  = node.var_node.value
-        type = BuiltInTypeSymbol(type_name)
-        if self.current_scope.lookup(name) is not None:
+        type = self.current_scope.lookup(type_name)
+        if self.current_scope.lookup(name,current_scope_only = True) is not None:
             raise Exception("ERROR : {name} is already declared".format(name = name))
         var = VarSymbol(name,type)
         self.current_scope.define(var)
@@ -92,22 +101,21 @@ class SemanticAnalyzer(NodeVisitor):
         proc_name = node.name
         proc_symbol = ProcedureSymbol(proc_name)
         self.current_scope.define(proc_symbol)
-        print("Enter %s"%proc_name)
+        print("Enter Procedure Scope : %s"%proc_name)
         procedure_scope = ScopedSymbolTable(
-            scope_level=2,scope_name=proc_name
+            scope_level=self.current_scope.scope_level+1,scope_name=proc_name,enclosing_scope=self.current_scope
         )
         self.current_scope = procedure_scope
         for param in node.params:
-            print(param)
-        #     name = param.var_node.value
-        #     type = param.type_node.value
-        #     var_symbol = VarSymbol(name,type)
-        #     self.current_scope.define(var_symbol)
-        #     proc_symbol.params.append(var_symbol)
-
-        # self.visit(node.block)
+            name = param.var_node.value
+            type = self.current_scope.lookup(param.type_node.value)
+            var_symbol = VarSymbol(name,type)
+            self.current_scope.define(var_symbol)
+            proc_symbol.params.append(var_symbol)
+        self.visit(node.block)
         print(self.current_scope)
-        print('Leaving %s'%proc_name)
+        self.current_scope = self.current_scope.enclosing_scope
+        print('Leaving Procedure Scope : %s'%proc_name)
 
     def visit_Params(self, node):
         pass

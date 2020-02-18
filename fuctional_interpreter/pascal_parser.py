@@ -70,7 +70,7 @@ class Parser():
     
     def formal_parameter_list(self):
         # FORMAL_PARAMETER_LIST : FORMAL_PARAMETERS | FORMAL_PARAMETERS SEMI FORMAL_PARAMETER_LIST
-        parameter_list = [self.formal_parameters()]
+        parameter_list = self.formal_parameters()
         while self.current_token.type == SEMI:
             self.eat(SEMI)
             parameter_list.extend(self.formal_parameters())
