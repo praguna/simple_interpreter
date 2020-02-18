@@ -7,9 +7,9 @@ class ScopedSymbolTable():
         self.scope_level = scope_level
         self.scope_name = scope_name
         self.enclosing_scope = enclosing_scope
-        self.__init__builtin()
+        self.__init__builtins()
         
-    def __init__builtin(self):
+    def __init__builtins(self):
         self.define(BuiltInTypeSymbol("INTEGER"))
         self.define(BuiltInTypeSymbol("REAL"))
 
