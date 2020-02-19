@@ -1,8 +1,63 @@
 from lexer import Lexer
 from pascal_parser import Parser
-from static_semantics import ScopedSymbolTable
+from static_semantics import BuiltInTypeSymbol
 from symbol_type import VarSymbol,ProcedureSymbol
 from visitor import NodeVisitor
+
+class ScopedSymbolTable(object):
+    def __init__(self, scope_name, scope_level, enclosing_scope=None):
+        self._symbols = {}
+        self.scope_name = scope_name
+        self.scope_level = scope_level
+        self.enclosing_scope = enclosing_scope
+
+    def _init_builtins(self):
+        self.insert(BuiltInTypeSymbol('INTEGER'))
+        self.insert(BuiltInTypeSymbol('REAL'))
+
+    def __str__(self):
+        h1 = 'SCOPE (SCOPED SYMBOL TABLE)'
+        lines = ['\n', h1, '=' * len(h1)]
+        for header_name, header_value in (
+            ('Scope name', self.scope_name),
+            ('Scope level', self.scope_level),
+            ('Enclosing scope',
+             self.enclosing_scope.scope_name if self.enclosing_scope else None
+            )
+        ):
+            lines.append('%-15s: %s' % (header_name, header_value))
+        h2 = 'Scope (Scoped symbol table) contents'
+        lines.extend([h2, '-' * len(h2)])
+        lines.extend(
+            ('%7s: %r' % (key, value))
+            for key, value in self._symbols.items()
+        )
+        lines.append('\n')
+        s = '\n'.join(lines)
+        return s
+
+    __repr__ = __str__
+
+    def insert(self, symbol):
+        self._symbols[symbol.name] = symbol
+        # To output subscripts, we get symbols to store a reference
+        # to their scope
+        symbol.scope = self
+
+    def lookup(self, name, current_scope_only=False):
+        # 'symbol' is either an instance of the Symbol class or None
+        symbol = self._symbols.get(name)
+
+        if symbol is not None:
+            return symbol
+
+        if current_scope_only:
+            return None
+
+        # recursively go up the chain and lookup the name
+        if self.enclosing_scope is not None:
+            return self.enclosing_scope.lookup(name)
+
 
 class SourceToSourceCompiler(NodeVisitor):
     def __init__(self):
@@ -30,7 +85,7 @@ class SourceToSourceCompiler(NodeVisitor):
             scope_level=1,
             enclosing_scope=self.current_scope, # None
         )
-        global_scope.__init__builtins()
+        global_scope._init_builtins()
         self.current_scope = global_scope
 
         # visit subtree
@@ -59,7 +114,7 @@ class SourceToSourceCompiler(NodeVisitor):
         return '%s %s %s' % (t1, node.op.value, t2)
 
     def visit_ProcedureDecl(self, node):
-        proc_name = node.proc_name
+        proc_name = node.name
         proc_symbol = ProcedureSymbol(proc_name)
         self.current_scope.insert(proc_symbol)
 
@@ -97,7 +152,7 @@ class SourceToSourceCompiler(NodeVisitor):
         result_str += ';'
         result_str += '\n'
 
-        result_str += self.visit(node.block_node)
+        result_str += self.visit(node.block)
         result_str += '; {END OF %s}' % proc_name
 
         # indent procedure text

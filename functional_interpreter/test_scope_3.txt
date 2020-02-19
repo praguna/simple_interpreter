@@ -1,0 +1,18 @@
+program Main;
+   var x, y : real;
+   a : integer;
+   procedure AlphaA(a : integer; b : real);
+      var y : integer;
+   begin { AlphaA }
+    a :=  b;
+   end;  { AlphaA }
+
+   procedure AlphaB(a : integer);
+      var b : integer;
+   begin { AlphaB }
+
+   end;  { AlphaB }
+
+begin { Main }
+
+end.  { Main }
