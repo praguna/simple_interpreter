@@ -196,5 +196,5 @@ class Parser():
             return UnOp(token,self.expr())
     
     def error(self):
-        print(self.current_token)
+        print(self.current_token,self.current_token.value)
         raise Exception("Invalid Syntax !")

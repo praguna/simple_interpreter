@@ -7,9 +7,8 @@ class ScopedSymbolTable():
         self.scope_level = scope_level
         self.scope_name = scope_name
         self.enclosing_scope = enclosing_scope
-        self.__init__builtins()
         
-    def __init__builtins(self):
+    def builtin(self):
         self.define(BuiltInTypeSymbol("INTEGER"))
         self.define(BuiltInTypeSymbol("REAL"))
 
@@ -41,10 +40,17 @@ class ScopedSymbolTable():
 class SemanticAnalyzer(NodeVisitor):
     def __init__(self):
         self.current_scope = None
+        self.__init__builtins()
+    
+    def __init__builtins(self):
+        self.current_scope = ScopedSymbolTable(0,"BuiltIn")
+        self.current_scope.builtin()
+        print(self.current_scope)
 
     def visit_Program(self,node):
         print("Entering Global Scope :")
-        global_scope = ScopedSymbolTable(scope_level=1,scope_name="global",enclosing_scope=None)
+        global_scope = ScopedSymbolTable(scope_level=self.current_scope.scope_level+1,\
+            scope_name="global",enclosing_scope=self.current_scope)
         self.current_scope = global_scope
         self.visit(node.block)
         print(global_scope)
