@@ -1,16 +1,25 @@
 from token import *
+from error import lexer_error
 # LEXER CLASS SCANS THE TEXT AND RETURNS TOKENS WHEN ONE IS ENCOUNTERED
 class Lexer():
     def __init__(self,text):
         self.text = text
         self.pos = 0
+        self.lineno = 1
+        self.column = 1
         self.current_char = self.text[self.pos]
     
     def advance(self):
+        if self.current_char[self.pos] == '\n':
+            self.lineno+=1
+            self.column = 0
+
         self.pos+=1
         if self.pos > len(self.text) -1:
             self.current_char = None
-        else : self.current_char = self.text[self.pos]
+        else : 
+            self.column+=1
+            self.current_char = self.text[self.pos]
 
     def next_token(self):
         while self.current_char is not None:
@@ -59,7 +68,12 @@ class Lexer():
         return Token(EOF,None)
 
     def error(self):
-        raise Exception("Invalid Character!")
+        s = "Lexer Error on {lexeme} in line : {line}, column : {column}".format(
+            lexeme = self.current_char,
+            line = self.lineno,
+            column = self.column
+        )
+        raise lexer_error(message=s)
     
     def skip_space(self):
         while self.current_char is not None and self.current_char.isspace():
