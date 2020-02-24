@@ -15,7 +15,7 @@ if __name__ == '__main__':
     symbuilder = SemanticAnalyzer()
     symbuilder.visit(tree)
     print("ALL CLEAR !")
-    # print(symbuilder.current_scope)
+    # # print(symbuilder.current_scope)
     interpreter  = Interpreter(tree)
     interpreter.interpret()
     print("Global Memory State !")

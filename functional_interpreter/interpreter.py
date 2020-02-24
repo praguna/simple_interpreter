@@ -39,22 +39,22 @@ class Interpreter(NodeVisitor):
     
     def visit_UnOp(self,node):
         token  = node.op
-        if token.type == PLUS:
+        if token.type == Token_Type.PLUS:
             return +self.visit(node.expr)
-        elif token.type == MINUS:
+        elif token.type == Token_Type.MINUS:
             return  -self.visit(node.expr)
 
     def visit_BnOp(self,node):
         token = node.op
-        if token.type == PLUS:
+        if token.type == Token_Type.PLUS:
             return self.visit(node.left) + self.visit(node.right)
-        elif token.type == MINUS:
+        elif token.type == Token_Type.MINUS:
             return self.visit(node.left) - self.visit(node.right)
-        elif token.type == MUL:
+        elif token.type == Token_Type.MUL:
             return self.visit(node.left) * self.visit(node.right)
-        elif token.type == DIV_INT:
+        elif token.type == Token_Type.DIV:
             return self.visit(node.left) // self.visit(node.right)
-        elif token.type == DIV_FLOAT:
+        elif token.type == Token_Type.DIV_FLOAT:
             return self.visit(node.left) / self.visit(node.right)
 
     def visit_Compound(self, node):
@@ -63,5 +63,6 @@ class Interpreter(NodeVisitor):
     
     def visit_ProcedureDecl(self,node):
         pass
+
     def visit_Params(self,node):
         pass
