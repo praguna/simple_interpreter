@@ -51,7 +51,7 @@ class Lexer():
             line = self.lineno,
             column = self.column
         )
-        raise lexer_error(message=s)
+        raise lexer_error(s)
     
     def skip_space(self):
         while self.current_char is not None and self.current_char.isspace():

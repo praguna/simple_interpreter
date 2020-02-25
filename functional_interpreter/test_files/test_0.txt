@@ -2,7 +2,7 @@ PROGRAM Part10;
 VAR
    number     : INTEGER;
    a, b, c, x : INTEGER;
-   y,z          : REAL;
+   y,y   : REAL;
 
 BEGIN {Part10}
    BEGIN
@@ -12,6 +12,7 @@ BEGIN {Part10}
       c := a - - b;
       x := c * b * a;
       z := c + 2;
+      m := 0;
       {d := 1+2}
    END;
    x := 11;

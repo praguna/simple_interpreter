@@ -1,6 +1,6 @@
 from ast import Program,Var,Block,VarDecl,Type,NoOp,BnOp,Num,UnOp,Assign,Compound,ProcedureDecl,Params
 from token import *
-from error import parser_error
+from error import parser_error,ErrorCode
 
 #   PARSER
 class Parser():
@@ -12,7 +12,7 @@ class Parser():
         # CALLER FUCTION FOR PARSING
         tree  = self.program()
         if self.current_token.type != Token_Type.EOF:
-            self.error()
+            self.error(self.current_token,ErrorCode.UNEXPECTED_TOKEN)
         return tree
     
     def eat(self,token_type):
@@ -20,7 +20,7 @@ class Parser():
         if self.current_token.type == token_type:
             self.current_token = self.lexer.next_token()
         else: 
-            self.error()
+            self.error(self.current_token,ErrorCode.UNEXPECTED_TOKEN)
 
     def program(self):
         # PROGRAM : BLOCK DOT
@@ -196,5 +196,5 @@ class Parser():
             self.eat(Token_Type.MINUS)
             return UnOp(token,self.expr())
     
-    def error(self):
-        raise parser_error(message="Parser Error")
+    def error(self,token,errorcode):
+        raise parser_error(f"{errorcode.value} -> {token}")

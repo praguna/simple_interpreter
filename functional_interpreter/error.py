@@ -11,13 +11,13 @@ class Error(Exception):
         self.error_code  = error_code
         self.message = message
         self.token = token
-        self.message = f'{self.__class__.__name__}:{message}'
+        self.message = f'{self.__class__.__name__}:{message}'    
 
-class lexer_error(Error):
+class lexer_error(Exception):
         pass
 
-class parser_error(Error):
+class parser_error(Exception):
         pass
 
-class semantic_error(Error):
+class semantic_error(Exception):
         pass
